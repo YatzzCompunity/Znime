@@ -20,18 +20,32 @@ jobs:
           repository: OuterTune/OuterTune
           path: outertune
 
-      
       - name: Apply ZMusic rebrand patch
         run: |
           cd outertune
-          echo "Workspace: $(pwd)"
-          echo "Patch file exists: $(ls -la ../zmusic/rebrand.patch)"
-          echo "Logo file exists: $(ls -la ../zmusic/launcher_foreground.png)"
-          git apply --whitespace=fix --verbose ../zmusic/rebrand.patch || {
-            echo "git apply failed, trying patch command"
-            patch -p1 --fuzz=3 < ../zmusic/rebrand.patch
-          }
+          git apply --whitespace=fix ../zmusic/rebrand.patch || patch -p1 --fuzz=3 < ../zmusic/rebrand.patch
           cp ../zmusic/launcher_foreground.png app/src/main/res/drawable/
           rm -f app/src/main/res/drawable/launcher_foreground.xml
           rm -f app/src/main/res/drawable/launcher_monochrome.xml
           echo "Rebrand applied successfully"
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Build release APK
+        run: |
+          cd outertune
+          chmod +x gradlew
+          ./gradlew assembleRelease --no-daemon -x test
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: ZMusic-APK
+          path: outertune/app/build/outputs/apk/release/*.apk
