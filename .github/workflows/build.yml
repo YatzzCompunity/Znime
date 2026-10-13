@@ -9,7 +9,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout ZMusic repo (patch files)
+      - name: Checkout ZMusic repo
         uses: actions/checkout@v4
         with:
           path: zmusic
@@ -20,14 +20,14 @@ jobs:
           repository: OuterTune/OuterTune
           path: outertune
 
-      - name: Apply ZMusic rebrand patch
+      - name: Apply ZMusic rebrand
         run: |
           cd outertune
           git apply --whitespace=fix ../zmusic/rebrand.patch || patch -p1 --fuzz=3 < ../zmusic/rebrand.patch
           cp ../zmusic/launcher_foreground.png app/src/main/res/drawable/
           rm -f app/src/main/res/drawable/launcher_foreground.xml
           rm -f app/src/main/res/drawable/launcher_monochrome.xml
-          echo "Rebrand applied successfully"
+          echo "Rebrand OK"
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -35,16 +35,23 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-  
+      - name: Setup Android SDK
+        run: |
+          export ANDROID_SDK_ROOT=/usr/local/lib/android/sdk
+          echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
+          echo "ANDROID_HOME=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
+          yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --licenses > /dev/null 2>&1 || true
+          $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager "platforms;android-36" "build-tools;36.0.0" "platform-tools" 2>&1 | tail -5
 
       - name: Build release APK
         run: |
           cd outertune
           chmod +x gradlew
-          ./gradlew assembleRelease --no-daemon -x test
+          ./gradlew assembleRelease --no-daemon -x test --stacktrace 2>&1 | tail -50
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: ZMusic-APK
           path: outertune/app/build/outputs/apk/release/*.apk
+          if-no-files-found: error
