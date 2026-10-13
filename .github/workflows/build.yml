@@ -49,9 +49,14 @@ jobs:
           chmod +x gradlew
           ./gradlew assembleRelease --no-daemon -x test --stacktrace 2>&1 | tail -50
 
+      - name: Find APK
+        run: |
+          cd outertune
+          find app/build/outputs -name "*.apk" -type f
+
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: ZMusic-APK
-          path: outertune/app/build/outputs/apk/release/*.apk
+          path: outertune/app/build/outputs/apk/**/*.apk
           if-no-files-found: error
