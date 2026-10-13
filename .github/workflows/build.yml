@@ -20,17 +20,17 @@ jobs:
           repository: OuterTune/OuterTune
           path: outertune
 
-      - name: Apply ZMusic rebrand patch
+      - name: Apply ZMusic branding (copy modified files)
         run: |
           cd outertune
-          # Strip any CRLF that may have sneaked in during upload
-          tr -d '\r' < ../zmusic/rebrand.patch > /tmp/rebrand.patch
-          git apply /tmp/rebrand.patch
+          # Copy ZMusic-modified files over fresh upstream (no patch = no fragility)
+          cp -r ../zmusic/overlay/* .
+          # Logos
           cp ../zmusic/launcher_foreground.png app/src/main/res/drawable/
           cp ../zmusic/launcher_monochrome.png app/src/main/res/drawable/
           rm -f app/src/main/res/drawable/launcher_foreground.xml
           rm -f app/src/main/res/drawable/launcher_monochrome.xml
-          echo "Rebrand applied"
+          echo "ZMusic files applied"
 
       - name: Set up JDK 21
         uses: actions/setup-java@v4
