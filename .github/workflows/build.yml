@@ -23,7 +23,9 @@ jobs:
       - name: Apply ZMusic rebrand patch
         run: |
           cd outertune
-          git apply ../zmusic/rebrand.patch
+          # Strip any CRLF that may have sneaked in during upload
+          tr -d '\r' < ../zmusic/rebrand.patch > /tmp/rebrand.patch
+          git apply /tmp/rebrand.patch
           cp ../zmusic/launcher_foreground.png app/src/main/res/drawable/
           cp ../zmusic/launcher_monochrome.png app/src/main/res/drawable/
           rm -f app/src/main/res/drawable/launcher_foreground.xml
