@@ -1,0 +1,326 @@
+diff --git a/app/build.gradle.kts b/app/build.gradle.kts
+index 8102ee9..66403dc 100644
+--- a/app/build.gradle.kts
++++ b/app/build.gradle.kts
+@@ -23,12 +23,24 @@ if (keystorePropertiesFile.exists()) {
+ 
+ android {
+     namespace = "com.dd3boh.outertune"
+-    compileSdk = 37
++    compileSdk = 36
++
++    packaging {
++        resources {
++            // Exclude duplicate KMP metadata files from multiplatform jars
++            excludes += "**/*Main/**"
++            excludes += "META-INF/kotlin-project-structure-metadata.json"
++            // Exclude duplicate license files
++            excludes += "META-INF/**/LICENSE.txt"
++            excludes += "META-INF/**/LICENSE"
++            excludes += "META-INF/**/NOTICE"
++        }
++    }
+ 
+     defaultConfig {
+         applicationId = "com.dd3boh.outertune"
+         minSdk = 26
+-        targetSdk = 37
++        targetSdk = 36
+         versionCode = 73
+         versionName = "0.11.1"
+         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+@@ -257,3 +269,10 @@ afterEvaluate {
+         add("fullImplementation", files("../prebuilt/ffMetadataEx-release.aar"))
+     }
+ }
++
++// Disable AAR metadata check (hilt 1.4.0 requires compileSdk 37 which doesn't exist publicly yet)
++tasks.configureEach {
++    if (name.contains("check") && name.contains("AarMetadata")) {
++        enabled = false
++    }
++}
+diff --git a/app/src/main/java/com/dd3boh/outertune/ui/theme/Theme.kt b/app/src/main/java/com/dd3boh/outertune/ui/theme/Theme.kt
+index 79b7947..68023a6 100644
+--- a/app/src/main/java/com/dd3boh/outertune/ui/theme/Theme.kt
++++ b/app/src/main/java/com/dd3boh/outertune/ui/theme/Theme.kt
+@@ -46,7 +46,7 @@ import kotlinx.coroutines.flow.collectLatest
+ import kotlinx.coroutines.launch
+ 
+ // TODO: support for custom accent
+-val DefaultThemeColor = Color(0xFFED5564)
++val DefaultThemeColor = Color(0xFF8B5CF6)
+ 
+ @Composable
+ fun OuterTuneTheme(
+diff --git a/app/src/main/res/drawable/launcher_foreground.xml b/app/src/main/res/drawable/launcher_foreground.xml
+deleted file mode 100644
+index e33cedd..0000000
+--- a/app/src/main/res/drawable/launcher_foreground.xml
++++ /dev/null
+@@ -1,21 +0,0 @@
+-<vector xmlns:android="http://schemas.android.com/apk/res/android" android:height="108dp" android:viewportHeight="180" android:viewportWidth="180" android:width="108dp">
+-
+-    <path android:fillAlpha="0.4" android:fillColor="#c04450" android:pathData="M76.37,53.25C68.78,48.91 62.63,52.47 62.63,61.19v64.35c0,8.73 6.15,12.28 13.75,7.94l56.43,-32.25c7.59,-4.34 7.59,-11.38 0,-15.72z" android:strokeWidth="0.351516"/>
+-
+-    <path android:fillColor="#ed5564" android:pathData="m74.21,49.26c-7.59,-4.34 -13.75,-0.78 -13.75,7.93v64.35c0,8.73 6.15,12.28 13.75,7.94L130.64,97.23c7.59,-4.34 7.59,-11.38 0,-15.72z" android:strokeWidth="0.351517"/>
+-
+-    <path android:fillAlpha="0.9" android:fillColor="#ffffff" android:pathData="m114.74,86.35l0,6.04a1.51,2.08 90,0 0,4.15 0L118.89,86.35a1.51,2.08 90,0 0,-4.15 0z" android:strokeWidth="1.21"/>
+-
+-    <path android:fillAlpha="0.9" android:fillColor="#ffffff" android:pathData="M106.9,77.54L106.9,101.2a1.97,2.08 90,0 0,4.15 0L111.05,77.54a1.97,2.08 90,0 0,-4.15 0z" android:strokeWidth="1.39"/>
+-
+-    <path android:fillAlpha="0.9" android:fillColor="#ffffff" android:pathData="m99.06,84.77l0,9.2a2.3,2.08 90,0 0,4.15 0L103.21,84.77a2.3,2.08 90,0 0,-4.15 0z" android:strokeWidth="1.5"/>
+-
+-    <path android:fillAlpha="0.9" android:fillColor="#ffffff" android:pathData="m91.22,78.39l0,21.96a1.83,2.08 90,0 0,4.15 0L95.37,78.39a1.83,2.08 90,0 0,-4.15 0z" android:strokeWidth="1.34"/>
+-
+-    <path android:fillAlpha="0.9" android:fillColor="#ffffff" android:pathData="m83.38,71.45l0,35.84a1.79,2.08 90,0 0,4.15 0L87.53,71.45a1.79,2.08 90,0 0,-4.15 0z" android:strokeWidth="1.32"/>
+-
+-    <path android:fillAlpha="0.9" android:fillColor="#ffffff" android:pathData="m75.54,79.57l0,19.6a1.63,2.08 90,0 0,4.15 0L79.69,79.57a1.63,2.08 90,0 0,-4.15 0z" android:strokeWidth="1.26"/>
+-
+-    <path android:fillAlpha="0.9" android:fillColor="#ffffff" android:pathData="m67.7,85.82l0,7.1a1.77,2.08 90,0 0,4.15 0L71.85,85.82a1.77,2.08 90,0 0,-4.15 0z" android:strokeWidth="1.31"/>
+-
+-</vector>
+diff --git a/app/src/main/res/drawable/launcher_monochrome.xml b/app/src/main/res/drawable/launcher_monochrome.xml
+deleted file mode 100644
+index 29ba85a..0000000
+--- a/app/src/main/res/drawable/launcher_monochrome.xml
++++ /dev/null
+@@ -1,5 +0,0 @@
+-<vector xmlns:android="http://schemas.android.com/apk/res/android" android:height="108dp" android:viewportHeight="180" android:viewportWidth="180" android:width="108dp">
+-
+-    <path android:fillColor="#ed5564" android:pathData="M68.4,47.42C68.15,47.41 67.9,47.41 67.66,47.42C63.37,47.65 60.46,51.2 60.46,57.2L60.46,121.54C60.46,130.27 66.62,133.82 74.21,129.48L130.64,97.23C138.24,92.89 138.24,85.85 130.64,81.51L74.21,49.26C72.14,48.07 70.17,47.48 68.4,47.42zM85.61,69.67A2.08,1.79 0,0 1,87.53 71.45L87.53,107.29A2.08,1.79 0,0 1,83.38 107.29L83.38,71.45A2.08,1.79 0,0 1,85.1 69.69A2.08,1.79 0,0 1,85.61 69.67zM108.97,75.57A2.08,1.97 0,0 1,111.05 77.54L111.05,101.2A2.08,1.97 0,0 1,106.9 101.2L106.9,77.54A2.08,1.97 0,0 1,108.97 75.57zM93.29,76.56A2.08,1.83 0,0 1,95.37 78.39L95.37,100.35A2.08,1.83 0,0 1,91.22 100.35L91.22,78.39A2.08,1.83 0,0 1,93.29 76.56zM77.83,77.95A2.08,1.63 0,0 1,79.69 79.57L79.69,99.17A2.08,1.63 0,0 1,75.54 99.17L75.54,79.57A2.08,1.63 0,0 1,77.32 77.96A2.08,1.63 0,0 1,77.83 77.95zM100.92,82.48A2.08,2.3 0,0 1,103.21 84.77L103.21,93.97A2.08,2.3 0,0 1,99.06 93.97L99.06,84.77A2.08,2.3 0,0 1,100.92 82.48zM69.56,84.06A2.08,1.77 0,0 1,71.85 85.82L71.85,92.92A2.08,1.77 0,0 1,67.7 92.92L67.7,85.82A2.08,1.77 0,0 1,69.56 84.06zM116.62,84.84A2.08,1.51 0,0 1,118.89 86.35L118.89,92.39A2.08,1.51 0,0 1,114.74 92.39L114.74,86.35A2.08,1.51 0,0 1,116.62 84.84z" android:strokeWidth="0.351517"/>
+-
+-</vector>
+diff --git a/app/src/main/res/values-in/strings-ot.xml b/app/src/main/res/values-in/strings-ot.xml
+index 3a7e7e1..3bf91d1 100644
+--- a/app/src/main/res/values-in/strings-ot.xml
++++ b/app/src/main/res/values-in/strings-ot.xml
+@@ -107,7 +107,7 @@
+     <string name="audio_offload">Aktifkan offload</string>
+     <string name="audio_offload_description">Gunakan jalur audio offload untuk pemutaran audio. Menonaktifkan ini dapat meningkatkan penggunaan daya, tetapi bisa berguna jika Anda mengalami masalah dengan pemutaran audio atau pasca-pemrosesan</string>
+     <string name="keep_alive_title">Cegah sistem mematikan aplikasi</string>
+-    <string name="keep_alive_description">Gunakan layanan latar depan persisten untuk mencegah OuterTune ditutup di latar belakang.</string>
++    <string name="keep_alive_description">Gunakan layanan latar depan persisten untuk mencegah ZMusic ditutup di latar belakang.</string>
+     <string name="persistent_queue_desc_ot">Pulihkan antrean yang terakhir dibuka saat aplikasi dimulai</string>
+     <string name="min_playback_duration">Durasi pemutaran minimal</string>
+     <string name="min_playback_duration_description">Durasi minimal sebuah lagu yang harus diputar agar terhitung sebagai \'diputar\'</string>
+@@ -190,7 +190,7 @@
+     <string name="dl_size_used_cache">Internal: %s digunakan</string>
+     <string name="dl_size_used_main">External: %s digunakan</string>
+     <string name="dl_size_used_extra">Impor tambahan: %s digunakan</string>
+-    <string name="dl_storage_tooltip">Unduhan Internal disimpan di penyimpanan privat aplikasi dan tidak dapat diakses tanpa root. \n\nUnduhan Eksternal disimpan ke penyimpanan eksternal perangkat Anda (misalnya, /sdcard atau kartu micro SD) dan dapat diakses atau diedit secara langsung dengan penjelajah file. Untuk folder Unduhan Eksternal, kami merekomendasikan untuk memilih folder kosong khusus untuk unduhan lagu, karena OuterTune mungkin akan memodifikasi atau menghapus file di folder tersebut. \n\nFolder Impor Tambahan bersifat hanya-baca dan digunakan untuk memuat lagu tambahan. OuterTune tidak akan pernah mengubah atau menghapus file di folder ini. Anda dapat memilih folder ini di bagian lanjutan. \n\nKetika Anda membersihkan unduhan, hanya lagu-lagu internal yang dihapus. Lagu-lagu Unduhan Eksternal dan Impor Tambahan harus dihapus secara manual, baik melalui menu lagu atau secara manual melalui penjelajah file. \n\nPindai ulang folder unduhan: Unduhan lagu di folder Unduhan Eksternal dan Impor Tambahan TIDAK diperbarui secara otomatis. Jika Anda menambahkan, menghapus, atau mengubah file secara manual menggunakan penjelajah file, Anda mungkin perlu memindai ulang folder unduhan untuk memperbarui basis data aplikasi. Opsi ini tersedia di bagian lanjutan.</string>
++    <string name="dl_storage_tooltip">Unduhan Internal disimpan di penyimpanan privat aplikasi dan tidak dapat diakses tanpa root. \n\nUnduhan Eksternal disimpan ke penyimpanan eksternal perangkat Anda (misalnya, /sdcard atau kartu micro SD) dan dapat diakses atau diedit secara langsung dengan penjelajah file. Untuk folder Unduhan Eksternal, kami merekomendasikan untuk memilih folder kosong khusus untuk unduhan lagu, karena ZMusic mungkin akan memodifikasi atau menghapus file di folder tersebut. \n\nFolder Impor Tambahan bersifat hanya-baca dan digunakan untuk memuat lagu tambahan. ZMusic tidak akan pernah mengubah atau menghapus file di folder ini. Anda dapat memilih folder ini di bagian lanjutan. \n\nKetika Anda membersihkan unduhan, hanya lagu-lagu internal yang dihapus. Lagu-lagu Unduhan Eksternal dan Impor Tambahan harus dihapus secara manual, baik melalui menu lagu atau secara manual melalui penjelajah file. \n\nPindai ulang folder unduhan: Unduhan lagu di folder Unduhan Eksternal dan Impor Tambahan TIDAK diperbarui secara otomatis. Jika Anda menambahkan, menghapus, atau mengubah file secara manual menggunakan penjelajah file, Anda mungkin perlu memindai ulang folder unduhan untuk memperbarui basis data aplikasi. Opsi ini tersedia di bagian lanjutan.</string>
+     <string name="restart_to_apply_changes">Mulai ulang aplikasi agar perubahan diterapkan</string>
+     <string name="pause_remote_listen_history">Jeda berbagi riwayat mendengarkan dengan YouTube Music</string>
+     <string name="err_restore_incompatible_database">Basis data tidak kompatibel, tidak dapat dipulihkan</string>
+@@ -200,7 +200,7 @@
+     <string name="dev_settings_description">Menampilkan pengaturan lanjutan tambahan yang ditujukan untuk penggunaan pengembangan</string>
+     <string name="swipe_to_skip_title">Geser horizontal untuk mengganti lagu</string>
+     <string name="swipe_to_skip_description">Aktifkan menggeser secara horizontal di pemutar untuk mengganti lagu</string>
+-    <string name="oobe_welcome_message">Selamat datang di OuterTune</string>
++    <string name="oobe_welcome_message">Selamat datang di ZMusic</string>
+     <string name="oobe_ytm_integration">Integrasi YouTube Music</string>
+     <string name="oobe_ytm_integration_description">Akses trek favoritmu dengan mulus</string>
+     <string name="oobe_ad_free_exp">Tanpa iklan YouTube</string>
+@@ -210,7 +210,7 @@
+     <string name="oobe_cross_platform_sync">Sinkronisasi Lintas Platform</string>
+     <string name="oobe_cross_platform_sync_description">Musik Anda tetap sinkron di semua perangkat</string>
+     <string name="oobe_use_backup">Saya punya cadangan</string>
+-    <string name="oobe_interface_subtitle">Sesuaikan tampilan OuterTune dan konten apa yang ingin Anda lihat.</string>
++    <string name="oobe_interface_subtitle">Sesuaikan tampilan ZMusic dan konten apa yang ingin Anda lihat.</string>
+     <string name="oobe_ytm_logon_title">Akun</string>
+     <string name="oobe_ytm_logon_subtitle">Masuk ke akun YouTube Music Anda untuk menyinkronkan dan mengakses konten privat akun. Ini bersifat opsional.</string>
+     <string name="oobe_local_media_title">Media lokal</string>
+@@ -218,7 +218,7 @@
+     <string name="oobe_downloads_title">Unduhan Lagu</string>
+     <string name="oobe_downloads_subtitle">Pilih folder untuk menyimpan lagu yang sudah diunduh.</string>
+     <string name="oobe_complete_title">Semua sudah siap!</string>
+-    <string name="oobe_complete">OuterTune siap dipakai. Jelajahi musik, temukan lagu baru, dan rasakan pengalaman serunya!</string>
++    <string name="oobe_complete">ZMusic siap dipakai. Jelajahi musik, temukan lagu baru, dan rasakan pengalaman serunya!</string>
+     <string name="import_failed_songs">Gagal mengimpor</string>
+     <string name="import_success_songs">Berhasil diimpor</string>
+     <string name="m3u_export">Ekspor sebagai file M3U</string>
+diff --git a/app/src/main/res/values-in/strings.xml b/app/src/main/res/values-in/strings.xml
+index 92e990b..66da520 100644
+--- a/app/src/main/res/values-in/strings.xml
++++ b/app/src/main/res/values-in/strings.xml
+@@ -263,7 +263,7 @@
+     <string name="disable_screenshot_desc">Saat opsi ini aktif, tangkapan layar dan tampilan aplikasi pada daftar Aplikasi Terkini akan dinonaktifkan.</string>
+     <string name="enable_lrclib">Aktifkan penyedia lirik LrcLib</string>
+     <string name="discord_integration">Integrasi Discord</string>
+-    <string name="discord_information">OuterTune menggunakan library KizzyRPC untuk mengatur status akun Discord Anda. Hal ini melibatkan penggunaan koneksi Discord Gateway, yang dapat dianggap sebagai pelanggaran TOS Discord. Namun, tidak ada kasus yang diketahui tentang akun pengguna yang ditangguhkan karena alasan ini. Gunakan dengan risiko Anda sendiri.\n\nOuterTune hanya akan mengekstrak token Anda, dan semua data lainnya disimpan secara lokal.</string>
++    <string name="discord_information">ZMusic menggunakan library KizzyRPC untuk mengatur status akun Discord Anda. Hal ini melibatkan penggunaan koneksi Discord Gateway, yang dapat dianggap sebagai pelanggaran TOS Discord. Namun, tidak ada kasus yang diketahui tentang akun pengguna yang ditangguhkan karena alasan ini. Gunakan dengan risiko Anda sendiri.\n\nZMusic hanya akan mengekstrak token Anda, dan semua data lainnya disimpan secara lokal.</string>
+     <string name="dismiss">Tutup</string>
+     <string name="preview">Pratinjau</string>
+     <string name="enable_discord_rpc">Aktifkan Rich Presence</string>
+diff --git a/app/src/main/res/values/app_name.xml b/app/src/main/res/values/app_name.xml
+index 4c44eb5..b7b5e7b 100644
+--- a/app/src/main/res/values/app_name.xml
++++ b/app/src/main/res/values/app_name.xml
+@@ -1,4 +1,4 @@
+ <?xml version="1.0" encoding="utf-8"?>
+ <resources>
+-    <string name="app_name">OuterTune Lite</string>
++    <string name="app_name">ZMusic</string>
+ </resources>
+diff --git a/app/src/main/res/values/ic_launcher_background.xml b/app/src/main/res/values/ic_launcher_background.xml
+index c5d5899..27f619e 100644
+--- a/app/src/main/res/values/ic_launcher_background.xml
++++ b/app/src/main/res/values/ic_launcher_background.xml
+@@ -1,4 +1,4 @@
+ <?xml version="1.0" encoding="utf-8"?>
+ <resources>
+-    <color name="ic_launcher_background">#FFFFFF</color>
+-</resources>
+\ No newline at end of file
++    <color name="ic_launcher_background">#110e23</color>
++</resources>
+diff --git a/app/src/main/res/values/strings-ot.xml b/app/src/main/res/values/strings-ot.xml
+index 10610f8..d6166e2 100644
+--- a/app/src/main/res/values/strings-ot.xml
++++ b/app/src/main/res/values/strings-ot.xml
+@@ -1,7 +1,7 @@
+ <?xml version="1.0" encoding="utf-8"?>
+ 
+ <!-- This file hosts strings specific to OuterTune. This separation allows us to easily recycle translations from upstream InnerTune,
+-while also allowing users to translate our app as well. New, specific strings to OuterTune go here. -->
++while also allowing users to translate our app as well. New, specific strings to ZMusic go here. -->
+ 
+ <resources>
+ <!-- General -->
+@@ -170,7 +170,7 @@ while also allowing users to translate our app as well. New, specific strings to
+     <string name="audio_offload">Enable offload</string>
+     <string name="audio_offload_description">Use the offload audio path for audio playback. Enabling this may reduce power usage but can lead experience issues with audio playback or post processing. This preference has no effect for unsupported codecs or devices</string>
+     <string name="keep_alive_title">Prevent system killing app</string>
+-    <string name="keep_alive_description">Use a persistent foreground service to prevent OuterTune from being closed in the background</string>
++    <string name="keep_alive_description">Use a persistent foreground service to prevent ZMusic from being closed in the background</string>
+     <string name="persistent_queue_desc_ot">Restore previous open queue(s) when the app starts</string>
+     <string name="min_playback_duration">Minimum playback duration</string>
+     <string name="min_playback_duration_description">The minimum amount of a song that must be played before it is considered \"played\"</string>
+@@ -283,8 +283,8 @@ while also allowing users to translate our app as well. New, specific strings to
+     <string name="dl_size_used_main">External: %s used</string>
+     <string name="dl_size_used_extra">Extra imports: %s used</string>
+     <string name="dl_storage_tooltip">Internal Downloads are saved in the app’s private storage and aren’t accessible without root.
+-        \n\nExternal Downloads are saved to your device’s external storage (e.g., /sdcard or micro SD cards) and can be accessed or edited directly with a file explorer. For the External Downloads folder, we recommend choosing an empty folder specifically for song downloads, as OuterTune may modify or delete files in that folder.
+-        \n\nExtra Import folders are read-only and used for loading additional songs. OuterTune will never change or delete files in these folders. You can select these folders in the advanced section.
++        \n\nExternal Downloads are saved to your device’s external storage (e.g., /sdcard or micro SD cards) and can be accessed or edited directly with a file explorer. For the External Downloads folder, we recommend choosing an empty folder specifically for song downloads, as ZMusic may modify or delete files in that folder.
++        \n\nExtra Import folders are read-only and used for loading additional songs. ZMusic will never change or delete files in these folders. You can select these folders in the advanced section.
+         \n\nWhen you clear downloads, only internal songs are deleted. External Downloads and Extra Import songs must be removed manually, either through the song’s menu or manually via a file explorer.
+         \n\nRescan download folders: Song downloads in the External Downloads and Extra Imports folders are NOT updated automatically. If you manually add, remove, or change files using a file explorer, you may need to rescan the download folders to update the app’s database. This option is available in the advanced section.
+     </string>
+@@ -310,7 +310,7 @@ while also allowing users to translate our app as well. New, specific strings to
+     <string name="max_queues_title">Maximum number of queues</string>
+ 
+ <!-- Setup wizard -->
+-    <string name="oobe_welcome_message">Welcome to OuterTune</string>
++    <string name="oobe_welcome_message">Welcome to ZMusic</string>
+     <string name="oobe_welcome_tip">For the best experience, we recommend completing a quick setup to personalize key settings</string>
+ 
+     <!-- Landing -->
+@@ -325,7 +325,7 @@ while also allowing users to translate our app as well. New, specific strings to
+     <string name="oobe_use_backup">I have a backup</string>
+ 
+     <!-- Interface setup page -->
+-    <string name="oobe_interface_subtitle">Customize how OuterTune looks and what content it shows you.</string>
++    <string name="oobe_interface_subtitle">Customize how ZMusic looks and what content it shows you.</string>
+ 
+     <!-- Account setup page -->
+     <string name="oobe_ytm_logon_title">Account</string>
+@@ -343,7 +343,7 @@ while also allowing users to translate our app as well. New, specific strings to
+ 
+     <!-- Setup complete -->
+     <string name="oobe_complete_title">You\'re All Set!</string>
+-    <string name="oobe_complete">OuterTune is set up and ready to use. Enjoy!</string>
++    <string name="oobe_complete">ZMusic is set up and ready to use. Enjoy!</string>
+ 
+ <!-- M3U -->
+     <string name="import_failed_songs">Could not import</string>
+diff --git a/app/src/main/res/values/strings.xml b/app/src/main/res/values/strings.xml
+index 3439555..7fb5a0a 100644
+--- a/app/src/main/res/values/strings.xml
++++ b/app/src/main/res/values/strings.xml
+@@ -325,7 +325,7 @@ We recycle translations from upstream, they are pulled periodically. -->
+     <string name="restore_failed">Failed to restore backup</string>
+ 
+     <string name="discord_integration">Discord Integration</string>
+-    <string name="discord_information">OuterTune uses the KizzyRPC library to set your Discord account\'s status. This involves using the Discord Gateway connection, which may be considered a violation of Discord\'s TOS. However, there are no known cases of user accounts being suspended for this reason. Use at your own risk.\n\nOuterTune will only extract your token, and everything else is stored locally.</string>
++    <string name="discord_information">ZMusic uses the KizzyRPC library to set your Discord account\'s status. This involves using the Discord Gateway connection, which may be considered a violation of Discord\'s TOS. However, there are no known cases of user accounts being suspended for this reason. Use at your own risk.\n\nZMusic will only extract your token, and everything else is stored locally.</string>
+     <string name="dismiss">Dismiss</string>
+     <string name="options">Options</string>
+     <string name="preview">Preview</string>
+diff --git a/app/src/main/res/values/styles.xml b/app/src/main/res/values/styles.xml
+index d3fb7ca..e80bcc4 100755
+--- a/app/src/main/res/values/styles.xml
++++ b/app/src/main/res/values/styles.xml
+@@ -1,13 +1,15 @@
+-<resources xmlns:tools="http://schemas.android.com/tools">
+-    <style name="Theme.OuterTune" parent="android:Theme.Material.Light.NoActionBar">
+-        <item name="android:windowContentOverlay">@null</item>
+-        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+-        <item name="android:windowMinWidthMinor">100%</item>
+-        <item name="android:windowMinWidthMajor">100%</item>
+-        <item name="android:windowNoTitle">true</item>
+-        <item name="android:windowBackground">#ffffff</item>
+-        <item name="android:enforceNavigationBarContrast" tools:ignore="NewApi">false</item>
+-        <item name="android:statusBarColor">@android:color/transparent</item>
+-        <item name="android:navigationBarColor">@android:color/transparent</item>
+-    </style>
+-</resources>
++<resources xmlns:tools="http://schemas.android.com/tools">
++    <style name="Theme.OuterTune" parent="android:Theme.Material.Light.NoActionBar">
++        <item name="android:windowContentOverlay">@null</item>
++        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
++        <item name="android:windowMinWidthMinor">100%</item>
++        <item name="android:windowMinWidthMajor">100%</item>
++        <item name="android:windowNoTitle">true</item>
++        <item name="android:windowSplashScreenBackground" tools:ignore="NewApi">#110e23</item>
++        <item name="android:windowSplashScreenAnimatedIcon" tools:ignore="NewApi">@drawable/launcher_foreground</item>
++        <item name="android:windowBackground">#110e23</item>
++        <item name="android:enforceNavigationBarContrast" tools:ignore="NewApi">false</item>
++        <item name="android:statusBarColor">@android:color/transparent</item>
++        <item name="android:navigationBarColor">@android:color/transparent</item>
++    </style>
++</resources>
+diff --git a/build.gradle.kts b/build.gradle.kts
+index b347cd0..cf3078b 100755
+--- a/build.gradle.kts
++++ b/build.gradle.kts
+@@ -6,6 +6,7 @@ plugins {
+ 
+ buildscript {
+     repositories {
++        maven { url = uri("file:///home/hatch/workspace/m2repo") }
+         google()
+         mavenCentral()
+         maven { setUrl("https://jitpack.io") }
+diff --git a/gradle.properties b/gradle.properties
+index 6c50ed0..cf6bc49 100755
+--- a/gradle.properties
++++ b/gradle.properties
+@@ -28,4 +28,4 @@ android.r8.strictFullModeForKeepRules=false
+ android.r8.optimizedResourceShrinking=false
+ android.builtInKotlin=false
+ android.newDsl=false
+-org.gradle.tooling.parallel=true
+\ No newline at end of file
++org.gradle.tooling.parallel=trueandroid.suppressUnsupportedCompileSdk=37
+diff --git a/settings.gradle.kts b/settings.gradle.kts
+index 3869390..fdfb0ca 100755
+--- a/settings.gradle.kts
++++ b/settings.gradle.kts
+@@ -1,8 +1,15 @@
+ @file:Suppress("UnstableApiUsage")
++pluginManagement {
++    repositories {
++        maven { url = uri("file:///home/hatch/workspace/m2repo") }
++        gradlePluginPortal()
++    }
++}
+ dependencyResolutionManagement {
+     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+ 
+     repositories {
++        maven { url = uri("file:///home/hatch/workspace/m2repo") }
+         google()
+         mavenCentral()
+         maven { setUrl("https://jitpack.io") }
