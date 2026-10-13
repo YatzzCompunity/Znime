@@ -1,0 +1,52 @@
+yaml
+name: Build ZMusic APK
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout ZMusic repo (patch files)
+        uses: actions/checkout@v4
+        with:
+          path: zmusic
+
+      - name: Checkout OuterTune source
+        uses: actions/checkout@v4
+        with:
+          repository: OuterTune/OuterTune
+          path: outertune
+
+      - name: Apply ZMusic rebrand patch
+        run: |
+          cd outertune
+          git apply ../zmusic/rebrand.patch
+          cp ../zmusic/launcher_foreground.png app/src/main/res/drawable/
+          rm -f app/src/main/res/drawable/launcher_foreground.xml
+          rm -f app/src/main/res/drawable/launcher_monochrome.xml
+          echo "Rebrand applied"
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Build release APK
+        run: |
+          cd outertune
+          chmod +x gradlew
+          ./gradlew assembleRelease --no-daemon -x test
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: ZMusic-APK
+          path: outertune/app/build/outputs/apk/release/*.apk
